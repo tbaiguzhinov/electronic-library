@@ -66,8 +66,9 @@ def main():
         comments = soup.find("div", id="content").find_all(class_="texts")
         title, author = soup.find("div", id="content").find("h1").text.split("::")
         print(title)
-        for comment in comments:
-            print(comment.find("span", class_="black").text)
+        genres = soup.find("div", id="content").find("span", class_="d_book").find_all("a")
+        genres = [item.text for item in genres]
+        print(genres)
         # download_image(image_url)
         
         # download_txt(url=f"https://tululu.org/txt.php?id={id_}",
