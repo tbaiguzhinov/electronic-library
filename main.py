@@ -51,7 +51,31 @@ def download_image(url, folder='images/'):
     with open(file_path, "wb") as file:
         file.write(response.content)
     return file_path
-     
+
+
+def parse_book_page(content):
+    """Функция для парсинга страницы книги.
+    Args:
+        content (str): Содержание страницы в виде текста.
+    Returns:
+        image_url (str): URL обложки книги.
+        comments_without_authors (list): Список комментариев к книге.
+        title (str): Название книги.
+        author (str): Имя автора книги.
+        genres_names (list): Список жанров книги.
+    """
+    soup = BeautifulSoup(content, 'lxml')
+    image_link = soup.find("div", class_="bookimage").find("img")["src"]
+    image_url = urljoin("https://tululu.org", image_link)
+    comments_full = soup.find("div", id="content").find_all(class_="texts")
+    comments_without_authors = [
+        comment.find("span", class_="black").text for comment in comments_full
+        ]
+    title, author = soup.find("div", id="content").find("h1").text.split("::")
+    genres_tags = soup.find("div", id="content").find("span", class_="d_book").find_all("a")
+    genres_names = [item.text for item in genres_tags]
+    return image_url, comments_without_authors, title, author, genres_names
+    
 
 def main():
     for id_ in range(1, 11):
@@ -60,15 +84,6 @@ def main():
             check_for_redirect(response)
         except HTTPError:
             continue
-        soup = BeautifulSoup(response.text, 'lxml')
-        book_image_link = soup.find("div", class_="bookimage").find("img")["src"]
-        image_url = urljoin("https://tululu.org", book_image_link)
-        comments = soup.find("div", id="content").find_all(class_="texts")
-        title, author = soup.find("div", id="content").find("h1").text.split("::")
-        print(title)
-        genres = soup.find("div", id="content").find("span", class_="d_book").find_all("a")
-        genres = [item.text for item in genres]
-        print(genres)
         # download_image(image_url)
         
         # download_txt(url=f"https://tululu.org/txt.php?id={id_}",
