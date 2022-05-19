@@ -5,6 +5,8 @@ import os
 
 from pathvalidate import sanitize_filename
 
+from urllib.parse import urljoin
+
 def check_for_redirect(response):
     if response.url == "https://tululu.org/":
         raise HTTPError
@@ -31,6 +33,24 @@ def download_txt(url, filename, folder='books/'):
     with open(file_path, "wb") as file:
         file.write(response.content)
     return file_path
+
+def download_image(url, folder='images/'):
+    """Функция для скачивания изображений.
+    Args:
+        url (str): Cсылка на изображение, которое хочется скачать.
+        filename (str): Имя файла, с которым сохранять.
+        folder (str): Папка, куда сохранять.
+    Returns:
+        str: Путь до файла, куда сохранён текст.
+    """
+    response = requests.get(url)
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+        
+    file_path = os.path.join(folder, f"{filename}.txt")
+    with open(file_path, "wb") as file:
+        file.write(response.content)
+    return file_path
      
 
 def main():
@@ -41,11 +61,14 @@ def main():
         except HTTPError:
             continue
         soup = BeautifulSoup(response.text, 'lxml')
-        title, author = soup.find("div", id="content").find("h1").text.split("::")
-        download_txt(url=f"https://tululu.org/txt.php?id={id_}",
-                     filename=f"{id_}. {title.strip()}",
-                     folder="books/",
-                     )
+        book_image_link = soup.find("div", class_="bookimage").find("img")["src"]
+        image_url = urljoin("https://tululu.org", book_image_link)
+        print(download_image(image_url))
+        # title, author = soup.find("div", id="content").find("h1").text.split("::")
+        # download_txt(url=f"https://tululu.org/txt.php?id={id_}",
+        #              filename=f"{id_}. {title.strip()}",
+        #              folder="books/",
+        #              )
             
 if __name__ == "__main__":
     main()
