@@ -1,12 +1,12 @@
 import argparse
-from bs4 import BeautifulSoup
-import requests
-from requests import HTTPError
 import os
+from urllib.parse import unquote, urljoin, urlsplit
 
+import requests
+from bs4 import BeautifulSoup
 from pathvalidate import sanitize_filename
+from requests import HTTPError
 
-from urllib.parse import urljoin, urlparse, urlsplit, unquote
 
 def check_for_redirect(response):
     if response.url == "https://tululu.org/":
@@ -95,6 +95,7 @@ def main():
                       filename=f"{id_}. {title}",
                       folder="books/",
                       )
-            
+
+
 if __name__ == "__main__":
     main()
