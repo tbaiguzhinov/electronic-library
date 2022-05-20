@@ -1,3 +1,4 @@
+import argparse
 from bs4 import BeautifulSoup
 import requests
 from requests import HTTPError
@@ -74,22 +75,26 @@ def parse_book_page(content):
     title, author = soup.find("div", id="content").find("h1").text.split("::")
     genres_tags = soup.find("div", id="content").find("span", class_="d_book").find_all("a")
     genres_names = [item.text for item in genres_tags]
-    return image_url, comments_without_authors, title, author, genres_names
+    return image_url, comments_without_authors, title.strip(), author.strip(), genres_names
     
 
 def main():
-    for id_ in range(1, 11):
+    parser = argparse.ArgumentParser()
+    parser.add_argument("start_id", help="Начальный id книги", type=int)
+    parser.add_argument("end_id", help="Конечный id книги", type=int)
+    args = parser.parse_args()
+    for id_ in range(args.start_id, args.end_id+1):
         response = requests.get(f"https://tululu.org/b{id_}")
         try:
             check_for_redirect(response)
         except HTTPError:
             continue
-        # download_image(image_url)
-        
-        # download_txt(url=f"https://tululu.org/txt.php?id={id_}",
-        #              filename=f"{id_}. {title.strip()}",
-        #              folder="books/",
-        #              )
+        image_url, comments_without_authors, title, author, genres = parse_book_page(response.text)
+        download_image(image_url)
+        download_txt(url=f"https://tululu.org/txt.php?id={id_}",
+                      filename=f"{id_}. {title}",
+                      folder="books/",
+                      )
             
 if __name__ == "__main__":
     main()
