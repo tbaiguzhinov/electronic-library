@@ -35,6 +35,7 @@ def download_txt(url, filename, folder='books/'):
         file.write(response.content)
     return file_path
 
+
 def download_image(url, folder='images/'):
     """Функция для скачивания изображений.
     Args:
@@ -73,10 +74,13 @@ def parse_book_page(content):
         comment.find("span", class_="black").text for comment in comments_full
         ]
     title, author = soup.find("div", id="content").find("h1").text.split("::")
-    genres_tags = soup.find("div", id="content").find("span", class_="d_book").find_all("a")
+    genres_tags = soup.find("div",
+                            id="content").find("span",
+                                               class_="d_book").find_all("a")
     genres_names = [item.text for item in genres_tags]
-    return image_url, comments_without_authors, title.strip(), author.strip(), genres_names
-    
+    return image_url, comments_without_authors, title.strip(), \
+        author.strip(), genres_names
+
 
 def main():
     parser = argparse.ArgumentParser()
@@ -89,12 +93,13 @@ def main():
             check_for_redirect(response)
         except HTTPError:
             continue
-        image_url, comments_without_authors, title, author, genres = parse_book_page(response.text)
+        image_url, comments_without_authors, title, \
+            author, genres = parse_book_page(response.text)
         download_image(image_url)
         download_txt(url=f"https://tululu.org/txt.php?id={id_}",
-                      filename=f"{id_}. {title}",
-                      folder="books/",
-                      )
+                     filename=f"{id_}. {title}",
+                     folder="books/",
+                     )
 
 
 if __name__ == "__main__":
