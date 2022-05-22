@@ -28,6 +28,7 @@ def download_txt(url, filename, folder='books/'):
         try:
             check_for_redirect(response)
         except HTTPError:
+            print(f"Текст \"{filename}\" не найден")
             return
     else:
         return
@@ -99,6 +100,7 @@ def main():
             try:
                 check_for_redirect(response)
             except HTTPError:
+                print(f"Книга с id {id_} не найдена")
                 continue
             image_url, comments_without_authors, title, \
                 author, genres = parse_book_page(response.text)
