@@ -24,9 +24,12 @@ def download_txt(url, filename, folder='books/'):
         str: Путь до файла, куда сохранён текст.
     """
     response = requests.get(url)
-    try:
-        check_for_redirect(response)
-    except HTTPError:
+    if response.ok:
+        try:
+            check_for_redirect(response)
+        except HTTPError:
+            return
+    else:
         return
     if not os.path.exists(folder):
         os.makedirs(folder)
@@ -50,9 +53,12 @@ def download_image(url, folder='images/'):
     filename = urlsplit(unquote(url)).path.split("/")[-1]
     file_path = os.path.join(folder, f"{filename}")
     response = requests.get(url)
-    with open(file_path, "wb") as file:
-        file.write(response.content)
-    return file_path
+    if response.ok:
+        with open(file_path, "wb") as file:
+            file.write(response.content)
+        return file_path
+    else:
+        return
 
 
 def parse_book_page(content):
@@ -89,17 +95,20 @@ def main():
     args = parser.parse_args()
     for id_ in range(args.start_id, args.end_id+1):
         response = requests.get(f"https://tululu.org/b{id_}")
-        try:
-            check_for_redirect(response)
-        except HTTPError:
-            continue
-        image_url, comments_without_authors, title, \
-            author, genres = parse_book_page(response.text)
-        download_image(image_url)
-        download_txt(url=f"https://tululu.org/txt.php?id={id_}",
-                     filename=f"{id_}. {title}",
-                     folder="books/",
-                     )
+        if response.ok:
+            try:
+                check_for_redirect(response)
+            except HTTPError:
+                continue
+            image_url, comments_without_authors, title, \
+                author, genres = parse_book_page(response.text)
+            download_image(image_url)
+            download_txt(url=f"https://tululu.org/txt.php?id={id_}",
+                         filename=f"{id_}. {title}",
+                         folder="books/",
+                         )
+        else:
+            return
 
 
 if __name__ == "__main__":
