@@ -75,7 +75,7 @@ def parse_book_page(content):
     """
     soup = BeautifulSoup(content, 'lxml')
     image_link = soup.find("div", class_="bookimage").find("img")["src"]
-    image_url = urljoin("https://tululu.org", image_link)
+    image_url = urljoin("https://tululu.org/", image_link)
     comments_full = soup.find("div", id="content").find_all(class_="texts")
     comments_without_authors = [
         comment.find("span", class_="black").text for comment in comments_full
