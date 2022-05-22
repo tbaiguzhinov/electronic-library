@@ -5,7 +5,7 @@ from urllib.parse import unquote, urljoin, urlsplit
 import requests
 from bs4 import BeautifulSoup
 from pathvalidate import sanitize_filename
-from requests import HTTPError
+from requests import HTTPError, ConnectionError
 
 
 def check_for_redirect(response):
@@ -95,22 +95,24 @@ def main():
     parser.add_argument("end_id", help="Конечный id книги", type=int)
     args = parser.parse_args()
     for id_ in range(args.start_id, args.end_id+1):
-        response = requests.get(f"https://tululu.org/b{id_}")
-        if response.ok:
-            try:
-                check_for_redirect(response)
-            except HTTPError:
-                print(f"Книга с id {id_} не найдена")
-                continue
-            image_url, comments_without_authors, title, \
-                author, genres = parse_book_page(response.text)
-            download_image(image_url)
-            download_txt(url=f"https://tululu.org/txt.php?id={id_}",
-                         filename=f"{id_}. {title}",
-                         folder="books/",
-                         )
-        else:
+        try:
+            response = requests.get(f"https://tululu.org/b{id_}")
+        except ConnectionError:
+            print("Не удалось установить соединение с сервером")
             return
+        response.raise_for_status
+        try:
+            check_for_redirect(response)
+        except HTTPError:
+            print(f"Книга с id {id_} не найдена")
+            continue
+        image_url, comments_without_authors, title, \
+            author, genres = parse_book_page(response.text)
+        download_image(image_url)
+        download_txt(url=f"https://tululu.org/txt.php?id={id_}",
+                     filename=f"{id_}. {title}",
+                     folder="books/",
+                     )
 
 
 if __name__ == "__main__":
