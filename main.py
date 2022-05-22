@@ -14,7 +14,7 @@ def check_for_redirect(response):
     return
 
 
-def download_txt(url, filename, folder='books/'):
+def download_txt(id, url, filename, folder='books/'):
     """Функция для скачивания текстовых файлов.
     Args:
         url (str): Cсылка на текст, который хочется скачать.
@@ -23,7 +23,8 @@ def download_txt(url, filename, folder='books/'):
     Returns:
         str: Путь до файла, куда сохранён текст.
     """
-    response = requests.get(url)
+    params = {"id": id}
+    response = requests.get(url, params=params)
     if response.ok:
         try:
             check_for_redirect(response)
@@ -107,7 +108,8 @@ def main():
         image_url, comments_without_authors, title, \
             author, genres = parse_book_page(response.text)
         download_image(image_url)
-        download_txt(url=f"https://tululu.org/txt.php?id={id_}",
+        download_txt(id=id_,
+                     url=f"https://tululu.org/txt.php",
                      filename=f"{id_}. {title}",
                      folder="books/",
                      )
