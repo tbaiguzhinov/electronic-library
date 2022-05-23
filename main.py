@@ -26,11 +26,7 @@ def download_txt(id, url, filename, folder='books/'):
     params = {"id": id}
     response = requests.get(url, params=params)
     if response.ok:
-        try:
-            check_for_redirect(response)
-        except HTTPError:
-            print(f"Текст \"{filename}\" не найден")
-            return
+        check_for_redirect(response)
     else:
         return
     os.makedirs(folder, exist_ok=True)
@@ -108,11 +104,14 @@ def main():
         image_url, comments_without_authors, title, \
             author, genres = parse_book_page(response.text)
         download_image(image_url)
-        download_txt(id=id_,
-                     url=f"https://tululu.org/txt.php",
-                     filename=f"{id_}. {title}",
-                     folder="books/",
-                     )
+        try:
+            download_txt(id=id_,
+                         url=f"https://tululu.org/txt.php",
+                         filename=f"{id_}. {title}",
+                         folder="books/",
+                         )
+        except HTTPError:
+            print(f"Текст \"{filename}\" не найден")
 
 
 if __name__ == "__main__":
