@@ -62,11 +62,12 @@ def parse_book_page(content):
     Args:
         content (str): Содержание страницы в виде текста.
     Returns:
-        image_url (str): URL обложки книги.
-        comments_without_authors (list): Список комментариев к книге.
-        title (str): Название книги.
-        author (str): Имя автора книги.
-        genres_names (list): Список жанров книги.
+        dict with keys:
+        - image_url (str): URL обложки книги.
+        - comments (list): Список комментариев к книге.
+        - title (str): Название книги.
+        - author (str): Имя автора книги.
+        - genres (list): Список жанров книги.
     """
     soup = BeautifulSoup(content, 'lxml')
     image_link = soup.find("div", class_="bookimage").find("img")["src"]
@@ -80,8 +81,12 @@ def parse_book_page(content):
                             id="content").find("span",
                                                class_="d_book").find_all("a")
     genres_names = [item.text for item in genres_tags]
-    return image_url, comments_without_authors, title.strip(), \
-        author.strip(), genres_names
+    book_info = {"image_url": image_url,
+                 "comments": comments_without_authors,
+                 "title": title.strip(),
+                 "author": author.strip(),
+                 "genres": genres_names}
+    return book_info
 
 
 def main():
@@ -100,12 +105,11 @@ def main():
             print("Не удалось установить соединение с сервером")
             return
         response.raise_for_status()
-        image_url, comments_without_authors, title, \
-            author, genres = parse_book_page(response.text)
-        download_image(image_url)
+        book_info = parse_book_page(response.text)
+        download_image(book_info[image_url])
         download_txt(id=id_,
                      url=f"https://tululu.org/txt.php",
-                     filename=f"{id_}. {title}",
+                     filename=f"{id_}. {book_info[title]}",
                      folder="books/",
                      )
 
