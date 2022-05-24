@@ -92,26 +92,22 @@ def main():
     for id_ in range(args.start_id, args.end_id+1):
         try:
             response = requests.get(f"https://tululu.org/b{id_}")
-        except ConnectionError:
-            print("Не удалось установить соединение с сервером")
-            return
-        response.raise_for_status
-        try:
             check_for_redirect(response)
         except HTTPError:
             print(f"Книга с id {id_} не найдена")
             continue
+        except ConnectionError:
+            print("Не удалось установить соединение с сервером")
+            return
+        response.raise_for_status
         image_url, comments_without_authors, title, \
             author, genres = parse_book_page(response.text)
         download_image(image_url)
-        try:
-            download_txt(id=id_,
-                         url=f"https://tululu.org/txt.php",
-                         filename=f"{id_}. {title}",
-                         folder="books/",
-                         )
-        except HTTPError:
-            print(f"Текст \"{filename}\" не найден")
+        download_txt(id=id_,
+                     url=f"https://tululu.org/txt.php",
+                     filename=f"{id_}. {title}",
+                     folder="books/",
+                     )
 
 
 if __name__ == "__main__":
