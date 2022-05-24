@@ -87,8 +87,8 @@ def parse_book_page(response):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("start_id", help="Начальный id книги", type=int)
-    parser.add_argument("end_id", help="Конечный id книги", type=int)
+    parser.add_argument("start_id", nargs='?', default=1, help="Начальный id книги", type=int)
+    parser.add_argument("end_id", nargs='?',  default=5, help="Конечный id книги", type=int)
     args = parser.parse_args()
     for id_ in range(args.start_id, args.end_id+1):
         try:
