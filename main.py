@@ -99,7 +99,7 @@ def main():
         except ConnectionError:
             print("Не удалось установить соединение с сервером")
             return
-        response.raise_for_status
+        response.raise_for_status()
         image_url, comments_without_authors, title, \
             author, genres = parse_book_page(response.text)
         download_image(image_url)
