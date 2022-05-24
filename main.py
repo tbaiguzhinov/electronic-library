@@ -25,10 +25,8 @@ def download_txt(id, url, filename, folder='books/'):
     """
     params = {"id": id}
     response = requests.get(url, params=params)
-    if response.ok:
-        check_for_redirect(response)
-    else:
-        return
+    response.raise_for_status()
+    check_for_redirect(response)
     os.makedirs(folder, exist_ok=True)
     file_path = os.path.join(folder, f"{sanitize_filename(filename)}.txt")
     with open(file_path, "wb") as file:
@@ -49,12 +47,10 @@ def download_image(url, folder='images/'):
     filename = urlsplit(unquote(url)).path.split("/")[-1]
     file_path = os.path.join(folder, filename)
     response = requests.get(url)
-    if response.ok:
-        with open(file_path, "wb") as file:
-            file.write(response.content)
-        return file_path
-    else:
-        return
+    response.raise_for_status()
+    with open(file_path, "wb") as file:
+        file.write(response.content)
+    return file_path
 
 
 def parse_book_page(content):
