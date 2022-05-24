@@ -47,7 +47,7 @@ def download_image(url, folder='images/'):
     """
     os.makedirs(folder, exist_ok=True)
     filename = urlsplit(unquote(url)).path.split("/")[-1]
-    file_path = os.path.join(folder, f"{filename}")
+    file_path = os.path.join(folder, filename)
     response = requests.get(url)
     if response.ok:
         with open(file_path, "wb") as file:
@@ -108,7 +108,7 @@ def main():
         book_info = parse_book_page(response.text)
         download_image(book_info[image_url])
         download_txt(id=id_,
-                     url=f"https://tululu.org/txt.php",
+                     url="https://tululu.org/txt.php",
                      filename=f"{id_}. {book_info[title]}",
                      folder="books/",
                      )
