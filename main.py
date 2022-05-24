@@ -53,7 +53,7 @@ def download_image(url, folder='images/'):
     return file_path
 
 
-def parse_book_page(content):
+def parse_book_page(response):
     """Функция для парсинга страницы книги.
     Args:
         content (str): Содержание страницы в виде текста.
@@ -65,9 +65,9 @@ def parse_book_page(content):
         - author (str): Имя автора книги.
         - genres (list): Список жанров книги.
     """
-    soup = BeautifulSoup(content, 'lxml')
+    soup = BeautifulSoup(response.text, 'lxml')
     image_link = soup.find("div", class_="bookimage").find("img")["src"]
-    image_url = urljoin("https://tululu.org/", image_link)
+    image_url = urljoin(response.url, image_link)
     comments_full = soup.find("div", id="content").find_all(class_="texts")
     comments_without_authors = [
         comment.find("span", class_="black").text for comment in comments_full
@@ -101,11 +101,12 @@ def main():
             print("Не удалось установить соединение с сервером")
             return
         response.raise_for_status()
-        book_info = parse_book_page(response.text)
-        download_image(book_info[image_url])
+        book_info = parse_book_page(response)
+        download_image(book_info["image_url"])
+        book_title = book_info["title"]
         download_txt(id=id_,
                      url="https://tululu.org/txt.php",
-                     filename=f"{id_}. {book_info[title]}",
+                     filename=f"{id_}. {book_title}",
                      folder="books/",
                      )
 
