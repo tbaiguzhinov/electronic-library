@@ -89,8 +89,20 @@ def parse_book_page(response):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("start_id", nargs='?', default=1, help="Начальный id книги", type=int)
-    parser.add_argument("end_id", nargs='?',  default=5, help="Конечный id книги", type=int)
+    parser.add_argument(
+        "start_id",
+        nargs='?',
+        default=1,
+        help="Начальный id книги",
+        type=int
+        )
+    parser.add_argument(
+        "end_id",
+        nargs='?',
+        default=5,
+        help="Конечный id книги",
+        type=int
+        )
     args = parser.parse_args()
     for id_ in range(args.start_id, args.end_id+1):
         try:
@@ -100,18 +112,19 @@ def main():
             book_contents = parse_book_page(response)
             download_image(book_contents["image_url"])
             book_title = book_contents["title"]
-            download_txt(id=id_,
-                         url="https://tululu.org/txt.php",
-                         filename=f"{id_}. {book_title}",
-                         folder="books/",
-                         )
+            download_txt(
+                id=id_,
+                url="https://tululu.org/txt.php",
+                filename=f"{id_}. {book_title}",
+                folder="books/",
+                )
         except HTTPError:
             print(f"Книга с id {id_} не найдена")
             continue
         except ConnectionError:
             print("Не удалось установить соединение с сервером")
             continue
-        
+
 
 if __name__ == "__main__":
     main()
