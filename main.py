@@ -9,7 +9,8 @@ from requests import HTTPError, ConnectionError
 
 
 def check_for_redirect(response):
-    if response.url == "https://tululu.org/":
+    response.raise_for_status()
+    if response.status_code == 301:
         raise HTTPError
     return
 
@@ -25,7 +26,6 @@ def download_txt(id, url, filename, folder='books/'):
     """
     params = {"id": id}
     response = requests.get(url, params=params)
-    response.raise_for_status()
     check_for_redirect(response)
     os.makedirs(folder, exist_ok=True)
     file_path = os.path.join(folder, f"{sanitize_filename(filename)}.txt")
@@ -47,7 +47,7 @@ def download_image(url, folder='images/'):
     filename = urlsplit(unquote(url)).path.split("/")[-1]
     file_path = os.path.join(folder, filename)
     response = requests.get(url)
-    response.raise_for_status()
+    check_for_redirect(response)
     with open(file_path, "wb") as file:
         file.write(response.content)
     return file_path
@@ -108,7 +108,6 @@ def main():
         try:
             response = requests.get(f"https://tululu.org/b{id_}")
             check_for_redirect(response)
-            response.raise_for_status()
             book_contents = parse_book_page(response)
             download_image(book_contents["image_url"])
             book_title = book_contents["title"]
