@@ -77,12 +77,14 @@ def parse_book_page(response):
                             id="content").find("span",
                                                class_="d_book").find_all("a")
     genres_names = [item.text for item in genres_tags]
-    book_info = {"image_url": image_url,
-                 "comments": comments_without_authors,
-                 "title": title.strip(),
-                 "author": author.strip(),
-                 "genres": genres_names}
-    return book_info
+    book_contents = {
+        "image_url": image_url,
+        "comments": comments_without_authors,
+        "title": title.strip(),
+        "author": author.strip(),
+        "genres": genres_names
+        }
+    return book_contents
 
 
 def main():
@@ -94,22 +96,22 @@ def main():
         try:
             response = requests.get(f"https://tululu.org/b{id_}")
             check_for_redirect(response)
+            response.raise_for_status()
+            book_contents = parse_book_page(response)
+            download_image(book_contents["image_url"])
+            book_title = book_contents["title"]
+            download_txt(id=id_,
+                         url="https://tululu.org/txt.php",
+                         filename=f"{id_}. {book_title}",
+                         folder="books/",
+                         )
         except HTTPError:
             print(f"Книга с id {id_} не найдена")
             continue
         except ConnectionError:
             print("Не удалось установить соединение с сервером")
-            return
-        response.raise_for_status()
-        book_info = parse_book_page(response)
-        download_image(book_info["image_url"])
-        book_title = book_info["title"]
-        download_txt(id=id_,
-                     url="https://tululu.org/txt.php",
-                     filename=f"{id_}. {book_title}",
-                     folder="books/",
-                     )
-
+            continue
+        
 
 if __name__ == "__main__":
     main()
