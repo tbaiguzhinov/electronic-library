@@ -1,12 +1,12 @@
-import requests
-import os
-import json
 import argparse
+import json
+import os
+from urllib.parse import unquote, urljoin, urlsplit
 
+import requests
 from bs4 import BeautifulSoup
-from requests import HTTPError, ConnectionError
-from urllib.parse import urljoin, unquote, urlsplit
 from pathvalidate import sanitize_filename
+from requests import ConnectionError, HTTPError
 
 
 def check_for_redirect(response):
@@ -108,7 +108,8 @@ def get_args():
         "--dest_folder",
         nargs='?',
         default="",
-        help="Путь к каталогу с результатами парсинга: картинкам, книгам, JSON",
+        help="Путь к каталогу с результатами парсинга: \
+            картинкам, книгам, JSON",
         type=str,
         )
     parser.add_argument(
