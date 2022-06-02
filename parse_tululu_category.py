@@ -1,11 +1,13 @@
 import requests
 import os
 import json
+import argparse
 
 from bs4 import BeautifulSoup
 from requests import HTTPError, ConnectionError
 from urllib.parse import urljoin, unquote, urlsplit
 from pathvalidate import sanitize_filename
+
 
 def check_for_redirect(response):
     response.raise_for_status()
@@ -85,38 +87,60 @@ def parse_book_page(response):
         }
     return book_contents, image_url
 
-all_books = []
-for page in range(0, 1):
-    if page == 0:
-        page = ""
-    try:
-        response = requests.get(
-            f"https://tululu.org/l55/{page}",
-            )
-        response.raise_for_status
-        soup = BeautifulSoup(response.text, 'lxml')
-        links = soup.select("table div[id=content] div.bookimage")
-        for link in links:
-            short_link = link.select_one("a")["href"]
-            response = requests.get(urljoin(response.url, short_link))
-            check_for_redirect(response)
-            book_info, image_url = parse_book_page(response)
-            book_title = book_info["title"]
-            book_path = download_txt(
-                id=short_link[2:-1],
-                url="https://tululu.org/txt.php",
-                filename=f"{book_title}",
-                folder="books/",
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--start_page",
+        nargs='?',
+        default=0,
+        help="Начальный номер страницы",
+        type=int
+        )
+    parser.add_argument(
+        "--end_page",
+        nargs='?',
+        default=702,
+        help="Конечный номер страницы",
+        type=int
+        )
+    args = parser.parse_args()
+    all_books = []
+    for page in range(args.start_page, args.end_page):
+        if page == 0:
+            page = ""
+        try:
+            response = requests.get(
+                f"https://tululu.org/l55/{page}",
                 )
-            if not book_path:
-                continue
-            ims_src = download_image(image_url)
-            book_info["book_path"] = book_path
-            book_info["ims_src"] = ims_src
-            all_books.append(book_info)
-    except ConnectionError:
-        print("Не удалось установить соединение с сервером")
-        continue
+            response.raise_for_status
+            soup = BeautifulSoup(response.text, 'lxml')
+            links = soup.select("table div[id=content] div.bookimage")
+            for link in links:
+                short_link = link.select_one("a")["href"]
+                response = requests.get(urljoin(response.url, short_link))
+                check_for_redirect(response)
+                book_info, image_url = parse_book_page(response)
+                book_title = book_info["title"]
+                book_path = download_txt(
+                    id=short_link[2:-1],
+                    url="https://tululu.org/txt.php",
+                    filename=f"{book_title}",
+                    folder="books/",
+                    )
+                if not book_path:
+                    continue
+                ims_src = download_image(image_url)
+                book_info["book_path"] = book_path
+                book_info["ims_src"] = ims_src
+                all_books.append(book_info)
+        except ConnectionError:
+            print("Не удалось установить соединение с сервером")
+            continue
+        except HTTPError:
+            print("Страница с указанным номером не найдена")
+            continue
+    with open("all_books_info.json", "w", encoding='utf8') as file:
+        json.dump(all_books, file, ensure_ascii=False)
 
-with open("all_books_info.json", "w", encoding='utf8') as file:
-    json.dump(all_books, file, ensure_ascii=False)
+if __name__ == "__main__":
+    main()
