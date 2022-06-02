@@ -16,7 +16,7 @@ def check_for_redirect(response):
     return
 
 
-def download_image(url, folder='images/'):
+def download_image(url, folder):
     """Функция для скачивания изображений.
     Args:
         url (str): Cсылка на изображение, которое хочется скачать.
@@ -35,7 +35,7 @@ def download_image(url, folder='images/'):
     return file_path
 
 
-def download_txt(id, url, filename, folder='books/'):
+def download_txt(id, url, filename, folder):
     """Функция для скачивания текстовых файлов.
     Args:
         url (str): Cсылка на текст, который хочется скачать.
@@ -87,23 +87,55 @@ def parse_book_page(response):
         }
     return book_contents, image_url
 
-def main():
+
+def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--start_page",
         nargs='?',
         default=0,
         help="Начальный номер страницы",
-        type=int
+        type=int,
         )
     parser.add_argument(
         "--end_page",
         nargs='?',
         default=702,
         help="Конечный номер страницы",
-        type=int
+        type=int,
         )
-    args = parser.parse_args()
+    parser.add_argument(
+        "--dest_folder",
+        nargs='?',
+        default="",
+        help="Путь к каталогу с результатами парсинга: картинкам, книгам, JSON",
+        type=str,
+        )
+    parser.add_argument(
+        "--skip_imgs",
+        action="store_true",
+        default=False,
+        help="не скачивать картинки",
+        )
+    parser.add_argument(
+        "--skip_txt",
+        action="store_true",
+        default=False,
+        help="не скачивать книги",
+        )
+    parser.add_argument(
+        "--json_path",
+        nargs='?',
+        default="all_books_info.json",
+        help="указать свой путь к *.json файлу с результатами",
+        type=str,
+        )
+    return parser.parse_args()
+
+
+def main():
+    args = get_args()
+    args.json_path
     all_books = []
     for page in range(args.start_page, args.end_page):
         if page == 0:
@@ -121,17 +153,22 @@ def main():
                 check_for_redirect(response)
                 book_info, image_url = parse_book_page(response)
                 book_title = book_info["title"]
-                book_path = download_txt(
-                    id=short_link[2:-1],
-                    url="https://tululu.org/txt.php",
-                    filename=f"{book_title}",
-                    folder="books/",
-                    )
-                if not book_path:
-                    continue
-                ims_src = download_image(image_url)
-                book_info["book_path"] = book_path
-                book_info["ims_src"] = ims_src
+                if not args.skip_txt:
+                    book_path = download_txt(
+                        id=short_link[2:-1],
+                        url="https://tululu.org/txt.php",
+                        filename=f"{book_title}",
+                        folder=os.path.join(args.dest_folder, "books"),
+                        )
+                    if not book_path:
+                        continue
+                    book_info["book_path"] = book_path
+                if not args.skip_imgs:
+                    img_src = download_image(
+                        url=image_url,
+                        folder=os.path.join(args.dest_folder, "images"),
+                        )
+                    book_info["img_src"] = img_src
                 all_books.append(book_info)
         except ConnectionError:
             print("Не удалось установить соединение с сервером")
@@ -139,7 +176,11 @@ def main():
         except HTTPError:
             print("Страница с указанным номером не найдена")
             continue
-    with open("all_books_info.json", "w", encoding='utf8') as file:
+    with open(
+            os.path.join(args.dest_folder, args.json_path),
+            "w",
+            encoding='utf8'
+            ) as file:
         json.dump(all_books, file, ensure_ascii=False)
 
 if __name__ == "__main__":
