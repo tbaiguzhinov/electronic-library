@@ -68,16 +68,14 @@ def parse_book_page(response):
         - genres (list): Список жанров книги.
     """
     soup = BeautifulSoup(response.text, 'lxml')
-    image_link = soup.find("div", class_="bookimage").find("img")["src"]
+    image_link = soup.select_one("div.bookimage img")["src"]
     image_url = urljoin(response.url, image_link)
-    comments_full = soup.find("div", id="content").find_all(class_="texts")
+    comments_full = soup.select("div[id=content] div.texts")
     comments_without_authors = [
-        comment.find("span", class_="black").text for comment in comments_full
+        comment.select_one("span.black").text for comment in comments_full
         ]
-    title, author = soup.find("div", id="content").find("h1").text.split("::")
-    genres_tags = soup.find("div",
-                            id="content").find("span",
-                                               class_="d_book").find_all("a")
+    title, author = soup.select_one("div[id=content] h1").text.split("::")
+    genres_tags = soup.select("div[id=content] span.d_book a")
     genres_names = [item.text for item in genres_tags]
     book_contents = {
         "title": title.strip(),
@@ -88,7 +86,7 @@ def parse_book_page(response):
     return book_contents, image_url
 
 all_books = []
-for page in range(0, 11):
+for page in range(0, 1):
     if page == 0:
         page = ""
     try:
@@ -97,18 +95,17 @@ for page in range(0, 11):
             )
         response.raise_for_status
         soup = BeautifulSoup(response.text, 'lxml')
-        links = soup.find("table").find("div", id="content").find_all("div", class_="bookimage")
+        links = soup.select("table div[id=content] div.bookimage")
         for link in links:
-            book_link = urljoin(response.url, link.find("a")["href"])
-            id_ = link.find("a")["href"][2:-1]
-            response = requests.get(book_link)
+            short_link = link.select_one("a")["href"]
+            response = requests.get(urljoin(response.url, short_link))
             check_for_redirect(response)
             book_info, image_url = parse_book_page(response)
             book_title = book_info["title"]
             book_path = download_txt(
-                id=id_,
+                id=short_link[2:-1],
                 url="https://tululu.org/txt.php",
-                filename=f"{id_}. {book_title}",
+                filename=f"{book_title}",
                 folder="books/",
                 )
             if not book_path:
