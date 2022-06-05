@@ -110,7 +110,6 @@ def get_args():
         default="",
         help="Путь к каталогу с результатами парсинга: \
             картинкам, книгам, JSON",
-        type=str,
         )
     parser.add_argument(
         "--skip_imgs",
@@ -129,7 +128,6 @@ def get_args():
         nargs='?',
         default="all_books_info.json",
         help="указать свой путь к *.json файлу с результатами",
-        type=str,
         )
     return parser.parse_args()
 
