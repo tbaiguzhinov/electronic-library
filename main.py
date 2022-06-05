@@ -10,7 +10,7 @@ from requests import ConnectionError, HTTPError
 
 
 def check_for_redirect(response):
-    if response.status_code == 301:
+    if response.history:
         raise HTTPError
     return
 
