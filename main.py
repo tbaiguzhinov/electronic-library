@@ -62,7 +62,7 @@ def parse_book_page(response):
         response (str): Содержание страницы в виде текста.
     Returns:
         book_content (dict) - словарь со следующими значениями:
-        - title (str): Название книги.        
+        - title (str): Название книги.
         - author (str): Имя автора книги.
         - comments (list): Список комментариев к книге.
         - genres (list): Список жанров книги.
@@ -83,7 +83,7 @@ def parse_book_page(response):
         "author": author.strip(),
         "comments": comments_without_authors,
         "genres": genres_names
-        }
+    }
     return book_contents, image_url
 
 
@@ -95,53 +95,50 @@ def get_args():
         default=0,
         help="Начальный номер страницы",
         type=int,
-        )
+    )
     parser.add_argument(
         "--end_page",
         nargs='?',
         default=702,
         help="Конечный номер страницы",
         type=int,
-        )
+    )
     parser.add_argument(
         "--dest_folder",
         nargs='?',
         default="",
         help="Путь к каталогу с результатами парсинга: \
             картинкам, книгам, JSON",
-        )
+    )
     parser.add_argument(
         "--skip_imgs",
         action="store_true",
         default=False,
         help="не скачивать картинки",
-        )
+    )
     parser.add_argument(
         "--skip_txt",
         action="store_true",
         default=False,
         help="не скачивать книги",
-        )
+    )
     parser.add_argument(
         "--json_path",
         nargs='?',
         default="all_books_info.json",
         help="указать свой путь к *.json файлу с результатами",
-        )
+    )
     return parser.parse_args()
 
 
 def main():
     args = get_args()
-    args.json_path
     all_books = []
     for page in range(args.start_page, args.end_page):
         if page == 0:
             page = ""
         try:
-            response = requests.get(
-                f"https://tululu.org/l55/{page}",
-                )
+            response = requests.get(f"https://tululu.org/l55/{page}")
             response.raise_for_status()
             soup = BeautifulSoup(response.text, 'lxml')
             links = soup.select("table div[id=content] div.bookimage")
@@ -168,7 +165,7 @@ def main():
                     img_src = download_image(
                         url=image_url,
                         folder=os.path.join(args.dest_folder, "images"),
-                        )
+                    )
                     book_contents["img_src"] = img_src
                 all_books.append(book_contents)
         except ConnectionError:
@@ -177,11 +174,8 @@ def main():
         except HTTPError:
             logging.error("Страница с указанным номером не найдена")
             continue
-    with open(
-            os.path.join(args.dest_folder, args.json_path),
-            "w",
-            encoding='utf8'
-            ) as file:
+    file_path = os.path.join(args.dest_folder, args.json_path)
+    with open(file_path, "w", encoding='utf8') as file:
         json.dump(all_books, file, ensure_ascii=False)
 
 if __name__ == "__main__":
