@@ -19,10 +19,9 @@ def download_image(url, folder):
     """Функция для скачивания изображений.
     Args:
         url (str): Cсылка на изображение, которое хочется скачать.
-        filename (str): Имя файла, с которым сохранять.
         folder (str): Папка, куда сохранять.
     Returns:
-        str: Путь до файла, куда сохранён текст.
+        file_path (str): Путь до файла, куда сохранён текст.
     """
     os.makedirs(folder, exist_ok=True)
     filename = urlsplit(unquote(url)).path.split("/")[-1]
@@ -38,11 +37,12 @@ def download_image(url, folder):
 def download_txt(id, url, filename, folder):
     """Функция для скачивания текстовых файлов.
     Args:
-        url (str): Cсылка на текст, который хочется скачать.
+        id (str): Идентификатор книги.
+        url (str): Cсылка на текст, который надо скачать.
         filename (str): Имя файла, с которым сохранять.
         folder (str): Папка, куда сохранять.
     Returns:
-        str: Путь до файла, куда сохранён текст.
+        file_path (str): Путь до файла, куда сохранён текст.
     """
     params = {"id": id}
     try:
@@ -61,14 +61,14 @@ def download_txt(id, url, filename, folder):
 def parse_book_page(response):
     """Функция для парсинга страницы книги.
     Args:
-        content (str): Содержание страницы в виде текста.
+        response (str): Содержание страницы в виде текста.
     Returns:
-        dict with keys:
-        - image_url (str): URL обложки книги.
-        - comments (list): Список комментариев к книге.
-        - title (str): Название книги.
+        book_content (dict) - словарь со следующими значениями:
+        - title (str): Название книги.        
         - author (str): Имя автора книги.
+        - comments (list): Список комментариев к книге.
         - genres (list): Список жанров книги.
+        image_url (str) - URL обложки книги.
     """
     soup = BeautifulSoup(response.text, 'lxml')
     image_link = soup.select_one("div.bookimage img")["src"]
