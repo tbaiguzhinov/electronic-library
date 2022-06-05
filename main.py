@@ -10,7 +10,6 @@ from requests import ConnectionError, HTTPError
 
 
 def check_for_redirect(response):
-    response.raise_for_status()
     if response.status_code == 301:
         raise HTTPError
     return
@@ -29,6 +28,7 @@ def download_image(url, folder):
     filename = urlsplit(unquote(url)).path.split("/")[-1]
     file_path = os.path.join(folder, filename)
     response = requests.get(url)
+    response.raise_for_status()
     check_for_redirect(response)
     with open(file_path, "wb") as file:
         file.write(response.content)
@@ -47,6 +47,7 @@ def download_txt(id, url, filename, folder):
     params = {"id": id}
     try:
         response = requests.get(url, params=params)
+        response.raise_for_status()
         check_for_redirect(response)
         os.makedirs(folder, exist_ok=True)
         file_path = os.path.join(folder, f"{sanitize_filename(filename)}.txt")
@@ -149,6 +150,7 @@ def main():
             for link in links:
                 short_link = link.select_one("a")["href"]
                 response = requests.get(urljoin(response.url, short_link))
+                response.raise_for_status()
                 check_for_redirect(response)
                 book_info, image_url = parse_book_page(response)
                 book_title = book_info["title"]
