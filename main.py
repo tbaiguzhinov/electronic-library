@@ -152,8 +152,8 @@ def main():
                 response = requests.get(urljoin(response.url, short_link))
                 response.raise_for_status()
                 check_for_redirect(response)
-                book_info, image_url = parse_book_page(response)
-                book_title = book_info["title"]
+                book_contents, image_url = parse_book_page(response)
+                book_title = book_contents["title"]
                 if not args.skip_txt:
                     book_path = download_txt(
                         id=short_link[2:-1],
@@ -163,14 +163,14 @@ def main():
                         )
                     if not book_path:
                         continue
-                    book_info["book_path"] = book_path
+                    book_contents["book_path"] = book_path
                 if not args.skip_imgs:
                     img_src = download_image(
                         url=image_url,
                         folder=os.path.join(args.dest_folder, "images"),
                         )
-                    book_info["img_src"] = img_src
-                all_books.append(book_info)
+                    book_contents["img_src"] = img_src
+                all_books.append(book_contents)
         except ConnectionError:
             print("Не удалось установить соединение с сервером")
             continue
