@@ -1,6 +1,7 @@
 import argparse
 import json
 import os
+import logging
 from urllib.parse import unquote, urljoin, urlsplit
 
 import requests
@@ -45,17 +46,14 @@ def download_txt(id, url, filename, folder):
         file_path (str): Путь до файла, куда сохранён текст.
     """
     params = {"id": id}
-    try:
-        response = requests.get(url, params=params)
-        response.raise_for_status()
-        check_for_redirect(response)
-        os.makedirs(folder, exist_ok=True)
-        file_path = os.path.join(folder, f"{sanitize_filename(filename)}.txt")
-        with open(file_path, "wb") as file:
-            file.write(response.content)
-        return file_path
-    except HTTPError:
-        return None
+    response = requests.get(url, params=params)
+    response.raise_for_status()
+    check_for_redirect(response)
+    os.makedirs(folder, exist_ok=True)
+    file_path = os.path.join(folder, f"{sanitize_filename(filename)}.txt")
+    with open(file_path, "wb") as file:
+        file.write(response.content)
+    return file_path
 
 
 def parse_book_page(response):
@@ -155,13 +153,15 @@ def main():
                 book_contents, image_url = parse_book_page(response)
                 book_title = book_contents["title"]
                 if not args.skip_txt:
-                    book_path = download_txt(
-                        id=short_link[2:-1],
-                        url="https://tululu.org/txt.php",
-                        filename=f"{book_title}",
-                        folder=os.path.join(args.dest_folder, "books"),
+                    try:
+                        book_path = download_txt(
+                            id=short_link[2:-1],
+                            url="https://tululu.org/txt.php",
+                            filename=f"{book_title}",
+                            folder=os.path.join(args.dest_folder, "books"),
                         )
-                    if not book_path:
+                    except HTTPError:
+                        logging.error(f"Текст книги {book_title} не найден")
                         continue
                     book_contents["book_path"] = book_path
                 if not args.skip_imgs:
@@ -172,10 +172,10 @@ def main():
                     book_contents["img_src"] = img_src
                 all_books.append(book_contents)
         except ConnectionError:
-            print("Не удалось установить соединение с сервером")
+            logging.error("Не удалось установить соединение с сервером")
             continue
         except HTTPError:
-            print("Страница с указанным номером не найдена")
+            logging.error("Страница с указанным номером не найдена")
             continue
     with open(
             os.path.join(args.dest_folder, args.json_path),
