@@ -143,7 +143,7 @@ def main():
             response = requests.get(
                 f"https://tululu.org/l55/{page}",
                 )
-            response.raise_for_status
+            response.raise_for_status()
             soup = BeautifulSoup(response.text, 'lxml')
             links = soup.select("table div[id=content] div.bookimage")
             for link in links:
