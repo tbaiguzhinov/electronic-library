@@ -59,7 +59,7 @@ def download_txt(id, url, filename, folder):
 def parse_book_page(response):
     """Функция для парсинга страницы книги.
     Args:
-        response (str): Содержание страницы в виде текста.
+        response (requests.models.Response): Содержание страницы.
     Returns:
         book_content (dict) - словарь со следующими значениями:
         - title (str): Название книги.
