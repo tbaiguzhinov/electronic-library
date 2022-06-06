@@ -156,16 +156,12 @@ def main():
                 book_contents, image_url = parse_book_page(response)
                 book_title = book_contents["title"]
                 if not args.skip_txt:
-                    try:
-                        book_path = download_txt(
-                            id=short_link[2:-1],
-                            url="https://tululu.org/txt.php",
-                            filename=f"{book_title}",
-                            folder=os.path.join(args.dest_folder, "books"),
-                        )
-                    except HTTPError:
-                        logging.error(f"Текст книги {book_title} не найден")
-                        continue
+                    book_path = download_txt(
+                        id=short_link[2:-1],
+                        url="https://tululu.org/txt.php",
+                        filename=f"{book_title}",
+                        folder=os.path.join(args.dest_folder, "books"),
+                    )
                     book_contents["book_path"] = book_path
                 if not args.skip_imgs:
                     img_src = download_image(
