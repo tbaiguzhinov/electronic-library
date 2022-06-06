@@ -11,6 +11,10 @@ from requests import ConnectionError, HTTPError
 
 
 def check_for_redirect(response):
+    """Функция для проверки на редирект.
+
+    Возвращает HTTPError в случае редиректа.
+    """
     if response.history:
         raise HTTPError
     return
@@ -18,6 +22,7 @@ def check_for_redirect(response):
 
 def download_image(url, folder):
     """Функция для скачивания изображений.
+
     Args:
         url (str): Cсылка на изображение, которое хочется скачать.
         folder (str): Папка, куда сохранять.
@@ -37,11 +42,13 @@ def download_image(url, folder):
 
 def download_txt(id, url, filename, folder):
     """Функция для скачивания текстовых файлов.
+
     Args:
         id (str): Идентификатор книги.
         url (str): Cсылка на текст, который надо скачать.
         filename (str): Имя файла, с которым сохранять.
         folder (str): Папка, куда сохранять.
+
     Returns:
         file_path (str): Путь до файла, куда сохранён текст.
     """
@@ -58,14 +65,12 @@ def download_txt(id, url, filename, folder):
 
 def parse_book_page(response):
     """Функция для парсинга страницы книги.
+
     Args:
         response (requests.models.Response): Содержание страницы.
+
     Returns:
-        book_content (dict) - словарь со следующими значениями:
-        - title (str): Название книги.
-        - author (str): Имя автора книги.
-        - comments (list): Список комментариев к книге.
-        - genres (list): Список жанров книги.
+        book_content (dict) - наполнение книги.
         image_url (str) - URL обложки книги.
     """
     soup = BeautifulSoup(response.text, 'lxml')
@@ -88,6 +93,7 @@ def parse_book_page(response):
 
 
 def get_args():
+    """Функция получения аргументов командной строки."""
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--start_page",
@@ -177,6 +183,7 @@ def main():
     file_path = os.path.join(args.dest_folder, args.json_path)
     with open(file_path, "w", encoding='utf8') as file:
         json.dump(all_books, file, ensure_ascii=False)
+
 
 if __name__ == "__main__":
     main()
