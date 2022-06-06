@@ -40,11 +40,11 @@ def download_image(url, folder):
     return file_path
 
 
-def download_txt(id, url, filename, folder):
+def download_txt(book_id, url, filename, folder):
     """Функция для скачивания текстовых файлов.
 
     Args:
-        id (str): Идентификатор книги.
+        book_id (str): Идентификатор книги.
         url (str): Cсылка на текст, который надо скачать.
         filename (str): Имя файла, с которым сохранять.
         folder (str): Папка, куда сохранять.
@@ -52,7 +52,7 @@ def download_txt(id, url, filename, folder):
     Returns:
         file_path (str): Путь до файла, куда сохранён текст.
     """
-    params = {"id": id}
+    params = {"id": book_id}
     response = requests.get(url, params=params)
     response.raise_for_status()
     check_for_redirect(response)
@@ -157,7 +157,7 @@ def main():
                 book_title = book_contents["title"]
                 if not args.skip_txt:
                     book_path = download_txt(
-                        id=short_link[2:-1],
+                        book_id=short_link[2:-1],
                         url="https://tululu.org/txt.php",
                         filename=f"{book_title}",
                         folder=os.path.join(args.dest_folder, "books"),
