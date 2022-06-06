@@ -1,7 +1,8 @@
 import argparse
 import json
-import os
 import logging
+import os
+import time
 from urllib.parse import unquote, urljoin, urlsplit
 
 import requests
@@ -172,6 +173,7 @@ def main():
                 all_books.append(book_contents)
         except ConnectionError:
             logging.error("Не удалось установить соединение с сервером")
+            time.sleep(30)
             continue
         except HTTPError:
             logging.error("Страница с указанным номером не найдена")
