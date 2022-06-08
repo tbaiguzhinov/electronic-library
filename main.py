@@ -74,7 +74,7 @@ def parse_book_page(response):
         book_content (dict) - наполнение книги.
         image_url (str) - URL обложки книги.
     """
-    soup = BeautifulSoup(response.text, 'lxml')
+    soup = BeautifulSoup(response.text, "lxml")
     image_link = soup.select_one("div.bookimage img")["src"]
     image_url = urljoin(response.url, image_link)
     comments_full = soup.select("div[id=content] div.texts")
@@ -98,21 +98,21 @@ def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--start_page",
-        nargs='?',
+        nargs="?",
         default=0,
         help="Начальный номер страницы",
         type=int,
     )
     parser.add_argument(
         "--end_page",
-        nargs='?',
+        nargs="?",
         default=702,
         help="Конечный номер страницы",
         type=int,
     )
     parser.add_argument(
         "--dest_folder",
-        nargs='?',
+        nargs="?",
         default="",
         help="Путь к каталогу с результатами парсинга: \
             картинкам, книгам, JSON",
@@ -131,7 +131,7 @@ def get_args():
     )
     parser.add_argument(
         "--json_path",
-        nargs='?',
+        nargs="?",
         default="all_books_info.json",
         help="указать свой путь к *.json файлу с результатами",
     )
@@ -147,7 +147,7 @@ def main():
         try:
             response = requests.get(f"https://tululu.org/l55/{page}")
             response.raise_for_status()
-            soup = BeautifulSoup(response.text, 'lxml')
+            soup = BeautifulSoup(response.text, "lxml")
             links = soup.select("table div[id=content] div.bookimage")
             for link in links:
                 short_link = link.select_one("a")["href"]
@@ -179,7 +179,7 @@ def main():
             logging.error("Страница с указанным номером не найдена")
             continue
     file_path = os.path.join(args.dest_folder, args.json_path)
-    with open(file_path, "w", encoding='utf8') as file:
+    with open(file_path, "w", encoding="utf8") as file:
         json.dump(all_books, file, ensure_ascii=False)
 
 
