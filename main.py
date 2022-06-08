@@ -32,7 +32,7 @@ def download_image(url, folder):
     """
     os.makedirs(folder, exist_ok=True)
     filename = urlsplit(unquote(url)).path.split("/")[-1]
-    file_path = os.path.join(folder, filename)
+    file_path = f"{folder}{filename}"
     response = requests.get(url)
     response.raise_for_status()
     check_for_redirect(response)
@@ -58,7 +58,7 @@ def download_txt(book_id, url, filename, folder):
     response.raise_for_status()
     check_for_redirect(response)
     os.makedirs(folder, exist_ok=True)
-    file_path = os.path.join(folder, f"{sanitize_filename(filename)}.txt")
+    file_path = f"{folder}{sanitize_filename(filename)}.txt"
     with open(file_path, "wb") as file:
         file.write(response.content)
     return file_path
