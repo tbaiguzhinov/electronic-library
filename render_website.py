@@ -14,7 +14,7 @@ def create_index():
     )
     template = env.get_template("template.html")
     with open("all_books_info.json", "r", encoding="utf8") as file:
-        books = json.loads(file.read().replace("\\\\", "/"))
+        books = json.load(file)
     index_page_folder = "pages"
     os.makedirs(index_page_folder, exist_ok=True)
     books_per_page = 20
