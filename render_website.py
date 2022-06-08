@@ -17,13 +17,15 @@ def create_index():
         books = json.loads(file.read().replace("\\\\", "/"))
     index_page_folder = "pages"
     os.makedirs(index_page_folder, exist_ok=True)
-    book_pages = list(chunked(books, 20))
-    pages_quantity = math.ceil(len(books)/20)
+    books_per_page = 20
+    columns_on_page = 2
+    book_pages = list(chunked(books, books_per_page))
+    pages_quantity = math.ceil(len(books)/books_per_page)
     for num, book_page in enumerate(book_pages, 1):
         rendered_page = template.render(
             current_page=num,
             pages_quantity=pages_quantity,
-            books=list(chunked(book_page, 2)),
+            books=list(chunked(book_page, columns_on_page)),
         )
         with open(
                 f"{index_page_folder}\index{num}.html",
