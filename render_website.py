@@ -2,6 +2,7 @@ import json
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from livereload import Server #, shell
+from more_itertools import chunked
 
 def create_index():
     env = Environment(
@@ -12,7 +13,7 @@ def create_index():
     with open("all_books_info.json", "r", encoding="utf8") as file:
         books = json.loads(file.read().replace("\\\\", "/"))
     rendered_page = template.render(
-        books=books,
+        books=list(chunked(books, 2)),
     )
     with open('index.html', 'w', encoding="utf8") as file:
         file.write(rendered_page)
