@@ -1,9 +1,5 @@
-books
-images
 bs4_tutorial.py
 peski.txt
 all_books_info.json
 parser_and_saver.py
 parser.py
-index.html
-pages/
