@@ -1,7 +1,7 @@
 import json
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
-
+from livereload import Server #, shell
 
 def create_index():
     env = Environment(
@@ -20,7 +20,10 @@ def create_index():
 
 def main():
     create_index()
-
+    server = Server()
+    server.watch("template.html", create_index) #shell("make html", cwd='docs'))
+    server.serve()
+    
 
 if __name__ == "__main__":
     main()
